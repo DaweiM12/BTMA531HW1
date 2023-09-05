@@ -1,0 +1,238 @@
+---
+title: "HW_1_Lan_Mouland"
+author: "Lan Dawei Y. Mouland"
+date: "2023-01-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#############################################################################################################################
+
+Question 1 a) answer will be 62
+```{r}
+object1 = seq(10,100, by = 4)
+object1[14]
+```
+Question 1 b) lists all objects and removes object1 as specified
+```{r}
+objects() #all objects
+remove(object1)
+```
+Question 1 c)
+```{r}
+install.packages("tidyr")
+library(tidyr)
+```
+Question 1 d) 
+```{r}
+t1 = runif(15,1,25)
+t2 = rnorm(15,5,2)
+matrix1 = matrix(c(t1,t2), ncol = 2)
+mean(matrix1[,1]) #uniform distribution mean 
+mean(matrix1[,2]) #normal distribution mean 
+```
+Question 1 e)
+```{r}
+qqplot(matrix1[,1],matrix1[,2], xlab = "uniform dist", ylab = "normal dist")
+```
+
+Question 2a) 
+```{r}
+install.packages("ISLR")
+library(ISLR)
+install.packages('plyr')
+library(plyr)
+data("Wage")
+force("Wage")
+obs = count(Wage) 
+print(obs) ### clean up 
+
+qual = 0
+quant = 0
+
+for(i in 1:ncol(Wage)){
+  if(is.numeric(Wage[1,i]) == TRUE){
+    quant = quant + 1
+  }
+  else{
+    qual = qual + 1 
+  } 
+}
+paste("number of qualitative columns:",print(qual)) #7 qualitative columns
+
+paste("number of quantitative columns:",print(quant)) #4 quantitative columns
+```
+Question 2b) Region is the least important variable since the only region is the middle atlantic. 
+
+Question 3
+```{r}
+force(data("Carseats")) 
+
+Carseats.g = Carseats[(Carseats$ShelveLoc =="Good"),]
+
+mean(Carseats.g$Advertising) #7.352941
+
+Carseats.b = Carseats[(Carseats$ShelveLoc == "Bad"),]
+
+mean(Carseats.b$Advertising) #6.21875
+
+```
+
+Question 4: 
+```{r}
+library(ggplot2)
+force(data("Carseats")) 
+
+force(Carseats)
+x = Carseats$Advertising
+y = Carseats$Sales
+
+plot(x,y, xlab = "Advertising", ylab = "Sales", main = "Sales vs Advertising Comparison") #4a
+abline(lm(y ~ x), col = "red") #4b
+
+cor(x,y) #0.2695068, this indicates a weak, but positive relationship that advertising results in sales. 4c
+```
+4d: Based solely on the above graph one cannot determine that the price decreases or increases. Sales is the responding variable to advertising and price, however, it cannot be determined if prices will change without other variables. Some of the factors that affect price and sales are market condition/state of the economy, competition, etc. A regression analysis could provide more insight between variables. 
+
+
+Question 5:
+following code references: https://www.tutorialspoint.com/how-to-create-a-frequency-table-in-data-frame-format-in-r
+Question 5a:
+```{r}
+shelf = table(Carseats$ShelveLoc) 
+urban = table(Carseats$Urban) 
+View(shelf)
+View(urban)
+```
+Urban - Not Urban: 118, Urban: 282 
+Shelf - Bad: 96, Good: 85, Medium: 219
+
+following code referenced: https://www.datamentor.io/r-programming/subplot/
+Question 5b MUST RUN CHUNK TOGETHER TO GET SIDE BY:
+```{r}
+library(ggplot2)
+par(mfrow=c(1,2))
+shelf.b = barplot(shelf, col = "darkred", main = "Shelf Pos", xlab = "Position", ylab = "Frequency")
+urban.b = barplot(urban, col = "darkblue",main = "Urban", xlab = "Is Urban?", ylab = "Frequency")
+
+
+```
+Question 5c:
+
+```{r}
+hist(Carseats$Sales, main = "Sales Figures", xlab = "Price", col = "darkgreen") #idk what the xaxis actually measures? 
+```
+mtcars[(mtcars[,2] == 6),]
+
+Question 6: File must be in you WD otherwise set it using getwd() and setwd()
+
+Question 6a: 
+```{r}
+
+install.packages("data.table")
+library(data.table)
+
+#read.csv method 
+getwd()
+setwd("/Users/daweimouland/UNI/UNI W23/BTMA 531")
+ttt = read.csv("ad.csv")
+AdData = ttt[,-1]
+
+View(AdData)
+######
+remove(ttt)
+remove(AdData)
+######
+
+#fread() method
+AdData = fread("ad.csv")
+AdData = AdData[,-1]
+```
+
+referenced the following code to make the graph in 6b: https://sejohnston.com/2012/08/09/a-quick-and-easy-function-to-plot-lm-results-in-r/
+
+Question 6b: 
+
+```{r}
+Sales_Radio = lm(AdData$sales ~ AdData$radio, data = AdData)
+summary(Sales_Radio)
+
+SALES.R = (25*Sales_Radio$coefficients[2]) + (Sales_Radio$coefficients[1])
+
+plot(AdData$sales ~ AdData$radio, data = AdData, main = "Sales and Radio Advrst Scat Plot", ylab = "sales $", xlab = "radio $")
+abline(Sales_Radio, col = "red")
+
+```
+
+Based on the summary table where the p-value is extremely small. I would reject the null hypothesis of "Radio advertising has a direct impact on sales" as the P value is 2e-16. 
+
+However, if we did use the equation from the linear model we will have: 
+  SALES.R = X*radio+intercept 
+The answer is $14.4 ######## ANSWER 6b
+
+Question 6c:
+```{r}
+install.packages("car")
+library(car)
+
+Sales_r = lm(AdData$sales~AdData$radio + AdData$newspaper + AdData$TV)
+summary(Sales_r)
+qqnorm(rstandard(Sales_r), xlab = "Normal Score", ylab = "Standrd Residual")
+qqline(rstandard(Sales_r), col = "red")
+
+```
+  
+Question 6d: 
+```{r}
+avPlots(Sales_r)
+```
+
+Question 7:
+
+```{r}
+library(ggplot2)
+force(data("Carseats"))
+
+force(Carseats)
+#a)
+carsuts = lm(Carseats$Sales ~ Carseats$ShelveLoc +
+               Carseats$Advertising +
+               Carseats$Price, data = Carseats)
+
+summary(carsuts)
+
+
+#b) 
+x = carsuts$coefficients[1] + carsuts$coefficients[2] + carsuts$coefficients[4]*10 + carsuts$coefficients[5]*100
+x #answer
+
+```
+
+Question 8:
+
+Question 8a: From a business point of view, which variable is the desired outcome?
+
+answer 8a: From a business point of view, based on this data set, high sales would be the most desired outcome. Sales are the main driving point behind continuing operations, because without sales, it is likely a business will not last. 
+```{r}
+hist(Carseats$Sales, col = "dark red", main = "Car seat sales", ylab = "Price", xlab = "Distribution ")
+```
+
+Question 8b: What aspects of the business does this data capture, and what aspects are missing in your opinion?
+
+answer 8b: This data set captures the sales information for car seats including vital customer and marketing information. Some vital missing information could include cost of goods, and profit from car seats, as well as units sold.  
+```{r}
+names(Carseats)
+```
+
+Question 8c: What questions can you think of to ask from this data set, the answer to which may be helpful to
+the business?
+
+Answer 8c: what is the average competitor price? Statistically is the shelf space significant to increases sales? Does location play a factor in sales price? 
+
+
+
+
+
